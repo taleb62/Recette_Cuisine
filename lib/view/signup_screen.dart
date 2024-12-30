@@ -22,7 +22,7 @@ class SignupScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF493AD5),
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.center, 
               ),
               const SizedBox(height: 30),
 

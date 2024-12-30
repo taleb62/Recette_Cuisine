@@ -151,16 +151,16 @@ class AuthController extends GetxController {
           'phone_number': phone,
           'profile_image': imagePath,
         });
-
-        if (insertResponse.hasError) {
-          Get.snackbar(
-            "Erreur",
-            "Impossible d'ajouter les informations utilisateur : ${insertResponse.error!.message}",
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-          return;
-        }
+        Get.offAllNamed('/login');
+        // if (insertResponse.hasError) {
+        //   Get.snackbar(
+        //     "Erreur",
+        //     "Impossible d'ajouter les informations utilisateur : ${insertResponse.error!.message}",
+        //     backgroundColor: Colors.red,
+        //     colorText: Colors.white,
+        //   );
+        //   return;
+        // }
 
         Get.snackbar(
           "Succès",
