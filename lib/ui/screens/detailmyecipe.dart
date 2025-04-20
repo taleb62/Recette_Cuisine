@@ -35,7 +35,7 @@ class _DetailPageState extends State<DetailPage> {
           .eq('recipe_id', widget.recipe['id'])
           .single();
 
-      setState(() {  
+      setState(() {
         _isFavorite = response != null;
       });
     } catch (e) {
@@ -121,7 +121,7 @@ class _DetailPageState extends State<DetailPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              title: Text('Write a Review'),
+              title: const Text('Write a Review'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -158,11 +158,11 @@ class _DetailPageState extends State<DetailPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: submitReview,
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ],
             );
@@ -183,12 +183,12 @@ class _DetailPageState extends State<DetailPage> {
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Row(
               children: [
-                Icon(Icons.check_circle, size: 20, color: Colors.green),
+                const Icon(Icons.check_circle, size: 20, color: Colors.green),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     '${ingredient['name']} - ${ingredient['amount']} ${ingredient['unit']}',
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ],
@@ -201,7 +201,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget buildReviewList() {
     if (_reviews.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'No reviews yet. Be the first to review!',
           style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
@@ -210,7 +210,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _reviews.length,
       itemBuilder: (context, index) {
         final review = _reviews[index];
@@ -232,13 +232,13 @@ class _DetailPageState extends State<DetailPage> {
                     CircleAvatar(
                       backgroundImage: user['profile_image'] != null
                           ? NetworkImage(user['profile_image'])
-                          : AssetImage('assets/default_user.png') as ImageProvider,
+                          : const AssetImage('assets/default_user.png') as ImageProvider,
                       radius: 20,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       user['name'] ?? 'Anonymous',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ],
                 ),
@@ -255,7 +255,7 @@ class _DetailPageState extends State<DetailPage> {
                 const SizedBox(height: 8),
                 Text(
                   review['review'] ?? '',
-                  style: TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
@@ -304,15 +304,15 @@ class _DetailPageState extends State<DetailPage> {
               const SizedBox(height: 16),
               Text(
                 widget.recipe['name'],
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Serves: ${widget.recipe['people']} | Time: ${widget.recipe['time']} mins',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Ingredients:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
@@ -321,11 +321,11 @@ class _DetailPageState extends State<DetailPage> {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: openReviewDialog,
-                icon: Icon(Icons.rate_review),
-                label: Text('Write a Review'),
+                icon: const Icon(Icons.rate_review),
+                label: const Text('Write a Review'),
               ),
               const SizedBox(height: 24),
-              Text(
+              const Text(
                 'Reviews:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),

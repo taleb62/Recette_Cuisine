@@ -4,6 +4,7 @@ import 'package:pifront/controller/FavoriteController.dart';
 import 'package:pifront/controller/HomeController.dart';
 import 'package:pifront/controller/RecipeController.dart';
 import 'package:pifront/ui/root_page.dart';
+import 'package:pifront/ui/screens/MyRecipePage.dart';
 import 'package:pifront/view/home_screen.dart';
 import 'package:pifront/view/signup_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
   '/login': (_) => LoginScreen(),
   '/signup': (_) => SignupScreen(),
   '/homescreen': (_) => RootPage(),
+  '/myrecipes': (_) => MyRecipesPage(),
 },
     );
   }

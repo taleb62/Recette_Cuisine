@@ -22,11 +22,11 @@ class SignupScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF493AD5),
                 ),
-                textAlign: TextAlign.center, 
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
 
-              // Name Input Field
+              
               Obx(() => TextField(
                     controller: authController.nameController,
                     decoration: InputDecoration(
@@ -46,7 +46,7 @@ class SignupScreen extends StatelessWidget {
                   )),
               const SizedBox(height: 20),
 
-              // Phone Input Field
+              
               Obx(() => TextField(
                     controller: authController.phoneController,
                     decoration: InputDecoration(
@@ -66,7 +66,7 @@ class SignupScreen extends StatelessWidget {
                   )),
               const SizedBox(height: 20),
 
-              // Email Input Field
+              
               Obx(() => TextField(
                     controller: authController.emailController,
                     decoration: InputDecoration(
@@ -86,7 +86,6 @@ class SignupScreen extends StatelessWidget {
                   )),
               const SizedBox(height: 20),
 
-              // Password Input Field
               Obx(() => TextField(
                     controller: authController.passwordController,
                     obscureText: true,
@@ -106,7 +105,7 @@ class SignupScreen extends StatelessWidget {
                   )),
               const SizedBox(height: 20),
 
-              // Confirm Password Input Field
+            
               Obx(() => TextField(
                     controller: authController.confirmPasswordController,
                     obscureText: true,
@@ -126,40 +125,56 @@ class SignupScreen extends StatelessWidget {
                   )),
               const SizedBox(height: 20),
 
-              // Image Picker
+            
               GestureDetector(
-                onTap: authController.pickImage,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFF493AD5),
-                      width: 1.5,
+                onTap: () async {
+                  await authController.pickImage(); 
+                  if (authController.selectedImage != null) {
+                    
+                    await authController.uploadImage("user_id_placeholder"); 
+                  }
+                },
+                child: Obx(() {
+                  return Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF493AD5),
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  child: authController.selectedImage == null
-                      ? const Center(
-                          child: Text(
-                            "Cliquez pour ajouter une photo",
-                            style: TextStyle(
-                              color: Color(0xFF493AD5),
+                    child: authController.uploadedImageUrl.value.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              authController.uploadedImageUrl.value,
+                              fit: BoxFit.cover,
                             ),
-                          ),
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            authController.selectedImage!,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                ),
+                          )
+                        : authController.selectedImage == null
+                            ? const Center(
+                                child: Text(
+                                  "Cliquez pour ajouter une photo",
+                                  style: TextStyle(
+                                    color: Color(0xFF493AD5),
+                                  ),
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  authController.selectedImage!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                  );
+                }),
               ),
               const SizedBox(height: 20),
 
-              // Sign Up Button
+            
               ElevatedButton(
                 onPressed: authController.signup,
                 child: const Text(
@@ -177,9 +192,9 @@ class SignupScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Redirect to Login
+              
               TextButton(
-                onPressed: () => Get.back(), // Retour à l'écran de connexion
+                onPressed: () => Get.back(), 
                 child: const Text(
                   "Vous avez déjà un compte ? Connectez-vous",
                   style: TextStyle(

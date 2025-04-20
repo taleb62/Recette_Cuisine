@@ -7,9 +7,8 @@ import '../controller/HomeController.dart';
 
 class AddRecipeController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
-  final HomeController homeController = Get.find<HomeController>(); // Access HomeController
+  final HomeController homeController = Get.find<HomeController>(); 
 
-  // Text controllers
   final nameController = TextEditingController();
   final timeController = TextEditingController();
   final peopleController = TextEditingController();
@@ -64,6 +63,14 @@ class AddRecipeController extends GetxController {
   // Save recipe and notify HomeController
   Future<void> saveRecipe() async {
     try {
+      // Get user ID from the authenticated session
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        Get.snackbar('Error', 'User is not authenticated.');
+        return;
+      }
+
+      final String userId = user.id; // User ID from the authenticated session
       final String name = nameController.text.trim();
       final int time = int.parse(timeController.text.trim());
       final int people = int.parse(peopleController.text.trim());
@@ -79,6 +86,7 @@ class AddRecipeController extends GetxController {
         'image': imageUrl,
         'people': people,
         'rate': rate,
+        'user_id': userId, // Associate recipe with the current user
       }).select().single();
 
       final String recipeId = response['id'];
@@ -101,6 +109,7 @@ class AddRecipeController extends GetxController {
         'image': imageUrl,
         'people': people,
         'rate': rate,
+        'user_id': userId, // Include the user ID in the recipe
         'ingredient': ingredients.map((ing) => {
               'name': ing['name'],
               'amount': ing['amount'],

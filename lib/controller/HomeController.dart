@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/material.dart';
+import '../ui/screens/detail_page.dart';
 
 class HomeController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -19,10 +21,23 @@ class HomeController extends GetxController {
   Future<void> fetchRecipes() async {
     try {
       isLoading.value = true;
-      final response = await supabase.from('recipe').select('*, ingredient(*)');
+      final response = await supabase.from('recipe').select('*, ingredient(*), review(rate)');
 
-      if (response != null) {
-        recipes.value = List<Map<String, dynamic>>.from(response);
+      if (response != null && response is List) {
+        recipes.value = List<Map<String, dynamic>>.from(response.map((recipe) {
+          final reviews = List<Map<String, dynamic>>.from(recipe['review'] ?? []);
+          final averageRate = reviews.isNotEmpty
+              ? reviews.map((r) => r['rate'] as int).reduce((a, b) => a + b) / reviews.length
+              : 0.0;
+          final reviewCount = reviews.length;
+
+          return {
+            ...recipe,
+            'averageRate': averageRate,
+            'reviewCount': reviewCount,
+          };
+        }));
+
         filteredRecipes.value = recipes;
       } else {
         Get.snackbar('Error', 'Failed to fetch recipes.');
@@ -32,12 +47,6 @@ class HomeController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  // Add a single recipe to the list
-  void addRecipeToList(Map<String, dynamic> recipe) {
-    recipes.insert(0, recipe); // Insert at the top
-    filteredRecipes.value = recipes; // Update the filtered list
   }
 
   void filterRecipes() {
@@ -54,6 +63,21 @@ class HomeController extends GetxController {
   }
 
   void goToDetails(Map<String, dynamic> recipe) {
-    Get.toNamed('/details', arguments: recipe);
+    Navigator.of(Get.context!).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => DetailPage(recipe: recipe),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  void addRecipeToList(Map<String, dynamic> recipe) {
+    recipes.insert(0, recipe); // Add the recipe to the top of the list
+    filteredRecipes.value = recipes; // Update filtered list
   }
 }

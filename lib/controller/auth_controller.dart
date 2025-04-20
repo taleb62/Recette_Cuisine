@@ -7,67 +7,73 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
 
-  // TextEditingControllers pour collecter les informations utilisateur
+
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var confirmPasswordController = TextEditingController();
   var nameController = TextEditingController();
   var phoneController = TextEditingController();
 
-  // Champs de validation (pour mise à jour dynamique UI)
+
   var isEmailValid = true.obs;
   var isPasswordValid = true.obs;
   var isConfirmPasswordValid = true.obs;
   var isNameValid = true.obs;
   var isPhoneValid = true.obs;
 
-  // Image choisie par l'utilisateur
-  File? selectedImage;
 
-  // Fonction pour sélectionner une image
+  File? selectedImage;
+  RxString uploadedImageUrl = ''.obs; 
+
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       selectedImage = File(pickedFile.path);
-      update(); // Met à jour l'interface utilisateur si nécessaire
+      update(); 
     } else {
       Get.snackbar("Info", "Aucune image sélectionnée.");
     }
   }
 
-  // Fonction pour uploader une image dans Supabase Storage
-  Future<String?> uploadImage(String userId) async {
-    if (selectedImage == null) return null;
+  
+  Future<void> uploadImage(String userId) async {
+    if (selectedImage == null) {
+      Get.snackbar("Erreur", "Veuillez sélectionner une image.");
+      return;
+    }
 
     try {
       final fileName = "${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg";
       final filePath = selectedImage!.path;
 
-      final response = await supabase.storage
+    
+      final filePathOnBucket = await supabase.storage
           .from('photos_bucket')
           .upload(fileName, File(filePath));
 
-      // if (response.error != null) {
-      //   throw Exception("Erreur lors de l'upload de l'image : ${response.error!.message}");
-      // }
-
-      // Récupérer l'URL ou le chemin de l'image
-      final publicUrl = supabase.storage.from('photos_bucket').getPublicUrl(fileName);
-      return publicUrl;
+      if (filePathOnBucket != null) {
+        
+        final publicUrl =
+            supabase.storage.from('photos_bucket').getPublicUrl(fileName);
+        uploadedImageUrl.value = publicUrl;
+        Get.snackbar("Succès", "Image téléchargée avec succès.");
+      } else {
+        throw Exception("Erreur lors de l'upload. Aucune réponse valide.");
+      }
     } catch (e) {
       Get.snackbar("Erreur", e.toString());
-      return null;
     }
   }
 
-  // Fonction de login
+
   Future<void> login() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    // Validation des champs
+    
     if (email.isEmpty || !email.isEmail) {
       isEmailValid.value = false;
       return;
@@ -92,7 +98,7 @@ class AuthController extends GetxController {
         );
         emailController.clear();
         passwordController.clear();
-        Get.offAllNamed('/homescreen'); // Redirige vers la page d'accueil
+        Get.offAllNamed('/homescreen'); 
       }
     } catch (e) {
       Get.snackbar(
@@ -104,7 +110,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // Fonction de signup
+
   Future<void> signup() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
@@ -112,7 +118,7 @@ class AuthController extends GetxController {
     String name = nameController.text.trim();
     String phone = phoneController.text.trim();
 
-    // Validation des champs
+  
     if (name.isEmpty) {
       isNameValid.value = false;
       return;
@@ -141,40 +147,35 @@ class AuthController extends GetxController {
       );
 
       if (response.user != null) {
-        // Uploader l'image si une image a été sélectionnée
-        String? imagePath = await uploadImage(response.user!.id);
+        
+        await uploadImage(response.user!.id);
 
-        // Ajouter l'utilisateur dans la table `user`
+      
         final insertResponse = await supabase.from('user').insert({
-          'id': response.user!.id, // ID généré par Supabase Auth
+          'id': response.user!.id, 
           'name': name,
           'phone_number': phone,
-          'profile_image': imagePath,
+          'profile_image': uploadedImageUrl.value,
         });
-        Get.offAllNamed('/login');
-        // if (insertResponse.hasError) {
-        //   Get.snackbar(
-        //     "Erreur",
-        //     "Impossible d'ajouter les informations utilisateur : ${insertResponse.error!.message}",
-        //     backgroundColor: Colors.red,
-        //     colorText: Colors.white,
-        //   );
-        //   return;
-        // }
 
-        Get.snackbar(
-          "Succès",
-          "Inscription réussie",
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-        emailController.clear();
-        passwordController.clear();
-        confirmPasswordController.clear();
-        nameController.clear();
-        phoneController.clear();
-        selectedImage = null;
-        Get.offAllNamed('/login'); // Redirige vers la page de connexion
+        if (insertResponse.error == null) {
+          Get.snackbar(
+            "Succès",
+            "Inscription réussie",
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+          emailController.clear();
+          passwordController.clear();
+          confirmPasswordController.clear();
+          nameController.clear();
+          phoneController.clear();
+          selectedImage = null;
+          Get.offAllNamed('/login'); 
+        } else {
+          throw Exception(
+              "Impossible d'ajouter les informations utilisateur : ${insertResponse.error!.message}");
+        }
       }
     } catch (e) {
       Get.snackbar(
@@ -188,7 +189,7 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    // Nettoyer les contrôleurs à la fermeture du contrôleur
+    
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();

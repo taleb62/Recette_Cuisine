@@ -1,11 +1,13 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pifront/ui/screens/MyRecipePage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pifront/constants.dart';
 import 'package:pifront/ui/Add_Screen.dart';
 import 'package:pifront/ui/screens/favorite_page.dart';
 import 'package:pifront/ui/screens/home_page.dart';
+import '../controller/FavoriteController.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({Key? key}) : super(key: key);
@@ -16,9 +18,10 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   final SupabaseClient supabase = Supabase.instance.client;
+  final FavoriteController favoriteController = Get.put(FavoriteController());
 
   int _bottomNavIndex = 0;
-  bool isDarkMode = false; // State for dark mode toggle
+  bool isDarkMode = false; 
 
   Future<Map<String, dynamic>> fetchUserData() async {
     try {
@@ -27,7 +30,7 @@ class _RootPageState extends State<RootPage> {
         throw Exception('User is not authenticated');
       }
 
-      // Fetch user data from the 'user' table
+      
       final response = await supabase
           .from('user')
           .select('name, phone_number, profile_image')
@@ -35,16 +38,19 @@ class _RootPageState extends State<RootPage> {
           .single();
 
       if (response != null) {
-        // Get email from Supabase Auth
+        
         final email = currentUser.email;
 
-        // Fetch public URL for profile image if available
+        
         final profileImageUrl = response['profile_image'] != null
-            ? supabase.storage.from('photos_bucket').getPublicUrl(response['profile_image'])
+            ? supabase.storage
+                .from('photos_bucket')
+                .getPublicUrl(response['profile_image'])
             : null;
 
-        response['email'] = email; // Add email to response
-        response['profile_image_url'] = profileImageUrl; // Add public URL to response
+        response['email'] = email; 
+        response['profile_image_url'] =
+            profileImageUrl; 
         return response;
       } else {
         throw Exception('User data not found in the database');
@@ -66,7 +72,7 @@ class _RootPageState extends State<RootPage> {
   void logout() async {
     try {
       await supabase.auth.signOut();
-      Get.offAllNamed('/login'); // Navigate to login screen
+      Get.offAllNamed('/login'); 
     } catch (e) {
       Get.snackbar('Error', 'Failed to logout: $e');
     }
@@ -89,7 +95,7 @@ class _RootPageState extends State<RootPage> {
             Text(
               _bottomNavIndex == 0 ? 'Home' : 'Favorite',
               style: TextStyle(
-                color: Constants.blackColor,
+                color: Color(0xFF493AD5),
                 fontWeight: FontWeight.w500,
                 fontSize: 24,
               ),
@@ -97,11 +103,11 @@ class _RootPageState extends State<RootPage> {
             IconButton(
               icon: Icon(
                 Icons.dark_mode_rounded,
-                color: Constants.blackColor,
+                color:  Color(0xFF493AD5),
                 size: 30.0,
               ),
               onPressed: () {
-                Scaffold.of(context).openEndDrawer(); // Open the drawer
+                Scaffold.of(context).openEndDrawer(); 
               },
             ),
           ],
@@ -118,18 +124,19 @@ class _RootPageState extends State<RootPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => Add_Screen())); // Navigate to Add_Screen
+                  builder: (context) =>
+                      Add_Screen())); 
         },
         child: Image.asset(
           'assets/images/plus.png',
           height: 30.0,
         ),
-        backgroundColor:Color(0xFF493AD5),
+        backgroundColor: const Color(0xFF493AD5),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar(
-        splashColor: Color(0xFF493AD5),
-        activeColor: Color(0xFF493AD5),
+        splashColor: const Color(0xFF493AD5),
+        activeColor: const Color(0xFF493AD5),
         inactiveColor: Colors.black.withOpacity(.5),
         icons: [Icons.home, Icons.favorite],
         activeIndex: _bottomNavIndex,
@@ -138,6 +145,11 @@ class _RootPageState extends State<RootPage> {
         onTap: (index) {
           setState(() {
             _bottomNavIndex = index;
+
+            
+            if (_bottomNavIndex == 1) {
+              favoriteController.fetchFavoriteRecipes();
+            }
           });
         },
       ),
@@ -202,6 +214,18 @@ class _RootPageState extends State<RootPage> {
                     value: isDarkMode,
                     onChanged: (value) => toggleDarkMode(),
                   ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.list, color: Constants.primaryColor),
+                  title: Text('My Recipes'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyRecipesPage(),
+                      ),
+                    );
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.logout, color: Constants.primaryColor),
